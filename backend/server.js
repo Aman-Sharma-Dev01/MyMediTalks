@@ -8,6 +8,8 @@ import articleRoutes from './routes/articles.js';
 import settingsRoutes from './routes/settings.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import healthRoutes from './routes/health.js';
+// Patch for CommonJS export in ES module
+const _healthRoutes = healthRoutes.default || healthRoutes;
 
 dotenv.config();
 
@@ -31,7 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api', healthRoutes);
+app.use('/api', _healthRoutes);
 
 app.get('/', (req, res) => {
     res.send('MyMediTalks API Running');
