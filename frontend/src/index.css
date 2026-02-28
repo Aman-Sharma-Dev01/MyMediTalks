@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Noto+Sans:wght@400;500;700&family=Nothing+You+Could+Do&family=Homemade+Apple&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Playfair Display", serif;
+  --font-sans: "Noto Sans", sans-serif;
+  --font-hand: "Nothing You Could Do", cursive;
+  --font-script: "Homemade Apple", cursive;
+  --font-serif: "Newsreader", serif;
+
+  --color-primary: #3A6342;
+  --color-primary-dark: #1A261D;
+  --color-primary-light: #E8F0EA;
+  --color-cream: #F3F0E8;
+  /* Main background */
+  --color-paper: #FDFCF8;
+  --color-ink: #3E2F26;
+  /* Dark brown for text */
+  --color-ink-light: #8E7C6E;
+  --color-secondary: #638869;
+  --color-accent: #D4805A;
+  /* Terracotta/Orange accent for pins/tape */
+
+  --shadow-soft: 0 4px 20px -2px rgba(62, 47, 38, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-ink font-sans transition-colors duration-300;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cream;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+  }
+}
+
+@layer utilities {
+  .paper-texture {
+    background-color: #F3F0E8;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  }
+
+  .sketch-card {
+    @apply relative bg-paper border border-[#e0dac8] shadow-soft transition-all duration-500 hover:shadow-xl;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+  }
+
+  /* Tape effect utility */
+  .tape::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 15px;
+    background-color: rgba(243, 222, 197, 0.8);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    z-index: 10;
+  }
+
+  .tape-top-center::before {
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+  }
+
+  .tape-bottom-left::before {
+    bottom: 5px;
+    left: 10px;
+    transform: rotate(5deg);
+    width: 80px;
+    height: 20px;
+    background-color: rgba(246, 237, 224, 0.9);
+    border-left: 2px dashed rgba(212, 128, 90, 0.5);
+    /* Orange dash detail */
+    border-right: 2px dashed rgba(212, 128, 90, 0.5);
+  }
+
+  /* Pin effect utility */
+  .pin::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--color-accent);
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.3), 1px 1px 3px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+  }
+
+  .pin-top-center::before {
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .pin-top-left::before {
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #A34A4A;
+    /* Reddish pin */
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Explicit Tiptap Editor Overrides for Typography */
+.tiptap h1,
+.ProseMirror h1 {
+  font-size: 3rem !important;
+  /* 48px */
+  font-weight: 800 !important;
+  margin-top: 2.5rem !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.1 !important;
+  color: var(--color-ink) !important;
+}
+
+.tiptap h2,
+.ProseMirror h2 {
+  font-size: 2.25rem !important;
+  /* 36px */
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.2 !important;
+  color: var(--color-ink) !important;
+}
+
+.tiptap img {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(49, 87, 44, 0.1);
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.tiptap img.ProseMirror-selectednode {
+  outline: 3px solid rgba(49, 87, 44, 0.5);
+}
