@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { Eye } from 'lucide-react';
 import api from '../lib/api';
 
 export default function ArchivePage() {
@@ -37,7 +38,7 @@ export default function ArchivePage() {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.4 }}
           className="flex flex-col gap-12 items-center"
         >
           <div className="w-full h-64 bg-secondary/10 rounded-full flex items-center justify-center overflow-hidden mix-blend-multiply">
@@ -46,6 +47,7 @@ export default function ArchivePage() {
               alt="Botanical olive branch sketch"
               className="w-full h-full object-cover opacity-60 grayscale sepia-[.3]"
               referrerPolicy="no-referrer"
+              loading="lazy"
             />
           </div>
           <div className="text-center space-y-2">
@@ -60,7 +62,7 @@ export default function ArchivePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.3 }}
           className="text-center mb-16 space-y-4"
         >
           <p className="text-secondary uppercase tracking-[0.4em] text-xs font-sans font-bold">Est. 2023</p>
@@ -103,15 +105,20 @@ export default function ArchivePage() {
             filteredArticles.map((article, idx) => (
               <motion.article
                 key={article._id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                transition={{ delay: idx * 0.03, duration: 0.25 }}
                 className="group relative flex flex-col gap-4 pb-16 border-b border-primary/5 last:border-0"
               >
                 <div className="flex items-baseline justify-between mb-1">
                   <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary font-sans">{article.category}</span>
-                  <time className="text-xs text-secondary font-sans uppercase tracking-widest">{new Date(article.createdAt).toLocaleDateString()}</time>
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1 text-xs text-secondary font-sans">
+                      <Eye size={12} /> {(article.views || 0).toLocaleString()}
+                    </span>
+                    <time className="text-xs text-secondary font-sans uppercase tracking-widest">{new Date(article.createdAt).toLocaleDateString()}</time>
+                  </div>
                 </div>
                 <Link to={`/article/${article.slug}`}>
                   <h2 className="text-2xl md:text-3xl font-medium text-ink group-hover:text-primary transition-colors cursor-pointer leading-tight">
@@ -154,8 +161,9 @@ export default function ArchivePage() {
             <img
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrUPohaPUXDmIcVoI3jRTx2gppFrCcpYoFZjbsaWpyKw87kqREbFr8Vnvl3PMCQM3cweivn45kgy-Y6kOY2LHMVWCY0FHHau-apm9pbqGalqWF2ftyOQagtoUoyc-3V_s_hb0IHo3vWEyWqytP9topDwBbsNgoNN5mFX4JBmBegelK6C818AOp96eKKBwejnUA6lpcFQmIqPgGxlmX9epnJDCj7JOawee_z_tA3oFt2ToHcJ_I9s2jwjJ82OI5TisQO84lFdXRuFIR"
               alt="Medicinal herbs sketch"
-              className="w-full h-full object-cover grayscale sepia-[.3] mix-blend-multiply"
+              className="w-full h-full object-cover grayscale sepia-[.3]"
               referrerPolicy="no-referrer"
+              loading="lazy"
             />
           </div>
         </div>

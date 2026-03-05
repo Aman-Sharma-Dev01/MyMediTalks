@@ -24,7 +24,7 @@ export default function PoetryPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.4 }}
         className="text-center mb-24 space-y-6"
       >
         <div className="flex items-center justify-center gap-4 mb-4">
@@ -49,14 +49,14 @@ export default function PoetryPage() {
           poetryArticles.map((poem, idx) => (
             <motion.article
               key={poem._id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.1, duration: 0.8 }}
+              transition={{ delay: idx * 0.05, duration: 0.3 }}
               className="flex flex-col gap-8 group"
             >
-              <div className="relative p-12 bg-white rounded-[2rem] shadow-sm border border-primary/5 hover:shadow-2xl transition-all duration-700 group-hover:-translate-y-2">
-                <div className="absolute -top-6 -left-6 w-24 h-24 opacity-10 pointer-events-none rotate-12 group-hover:rotate-0 transition-transform duration-700">
+              <div className="relative p-12 bg-white rounded-[2rem] shadow-sm border border-primary/5 hover:shadow-xl transition-shadow duration-300 group-hover:-translate-y-1">
+                <div className="absolute -top-6 -left-6 w-24 h-24 opacity-10 pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-300">
                   <span className="material-symbols-outlined text-8xl text-primary">spa</span>
                 </div>
 

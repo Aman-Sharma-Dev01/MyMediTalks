@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Clock, Globe, FileEdit, Trash2, Pencil } from 'lucide-react';
+import { Plus, Clock, Globe, FileEdit, Trash2, Pencil, Sparkles, Eye, BarChart2 } from 'lucide-react';
 import api from '../../lib/api';
 
 export default function AdminDashboard() {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
+    const [particlesEnabled, setParticlesEnabled] = useState(() => {
+        const stored = localStorage.getItem('particlesEnabled');
+        return stored !== 'false'; // Default to true
+    });
+
+    const toggleParticles = () => {
+        const newValue = !particlesEnabled;
+        setParticlesEnabled(newValue);
+        localStorage.setItem('particlesEnabled', String(newValue));
+        // Dispatch custom event so ParticleEffect updates in same tab
+        window.dispatchEvent(new Event('particlesToggled'));
+    };
 
     useEffect(() => {
         fetchArticles();
@@ -55,12 +67,27 @@ export default function AdminDashboard() {
                     <h1 className="text-4xl font-display italic text-ink mb-2">Journal Entries</h1>
                     <p className="text-secondary font-hand">Manage your writings</p>
                 </div>
-                <Link
-                    to="/admin/editor"
-                    className="bg-primary text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-ink transition-colors"
-                >
-                    <Plus size={16} /> New Entry
-                </Link>
+                <div className="flex items-center gap-4">
+                    {/* Particle Effect Toggle */}
+                    <button
+                        onClick={toggleParticles}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all border ${
+                            particlesEnabled 
+                                ? 'bg-pink-100 text-pink-700 border-pink-200 hover:bg-pink-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'
+                        }`}
+                        title={particlesEnabled ? 'Disable particle effects' : 'Enable particle effects'}
+                    >
+                        <Sparkles size={16} className={particlesEnabled ? 'text-pink-500' : 'text-gray-400'} />
+                        <span className="hidden sm:inline">Particles {particlesEnabled ? 'On' : 'Off'}</span>
+                    </button>
+                    <Link
+                        to="/admin/editor"
+                        className="bg-primary text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-ink transition-colors"
+                    >
+                        <Plus size={16} /> New Entry
+                    </Link>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -84,8 +111,9 @@ export default function AdminDashboard() {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-cream/50 border-b border-primary/10">
-                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans w-1/2">Title</th>
+                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans w-1/3">Title</th>
                             <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans">Status</th>
+                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans">Views</th>
                             <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans">Date</th>
                             <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary font-sans text-right">Actions</th>
                         </tr>
@@ -93,7 +121,7 @@ export default function AdminDashboard() {
                     <tbody>
                         {filteredArticles.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-12 text-center text-secondary italic">
+                                <td colSpan={5} className="px-6 py-12 text-center text-secondary italic">
                                     No entries found in this category.
                                 </td>
                             </tr>
@@ -115,11 +143,27 @@ export default function AdminDashboard() {
                                             {getComputedStatus(article)}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <span className="flex items-center gap-1.5 text-sm font-sans text-secondary">
+                                            <Eye size={14} className="text-primary/50" />
+                                            {(article.views || 0).toLocaleString()}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-sm font-sans text-secondary">
                                         {new Date(article.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
+                                            {/* Engagement button for published articles */}
+                                            {getComputedStatus(article) === 'published' && (
+                                                <Link
+                                                    to={`/admin/engagement/${article._id}`}
+                                                    className="p-2 text-secondary hover:text-green-600 transition-colors bg-white rounded-lg border border-green-100 shadow-sm"
+                                                    title="View Engagement"
+                                                >
+                                                    <BarChart2 size={16} />
+                                                </Link>
+                                            )}
                                             {/* Editor route needs ID to edit */}
                                             <Link to={`/admin/editor/${article._id}`} className="p-2 text-secondary hover:text-primary transition-colors bg-white rounded-lg border border-primary/10 shadow-sm">
                                                 <Pencil size={16} />

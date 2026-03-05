@@ -8,6 +8,10 @@ import articleRoutes from './routes/articles.js';
 import settingsRoutes from './routes/settings.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import healthRoutes from './routes/health.js';
+import readerAuthRoutes from './routes/readerAuth.js';
+import commentsRoutes from './routes/comments.js';
+import interactionsRoutes from './routes/interactions.js';
+import notificationsRoutes from './routes/notifications.js';
 // Patch for CommonJS export in ES module
 const _healthRoutes = healthRoutes.default || healthRoutes;
 
@@ -33,6 +37,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/reader', readerAuthRoutes);
+app.use('/api/comments', commentsRoutes);
+app.use('/api/interactions', interactionsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 app.use('/api', _healthRoutes);
 
 app.get('/', (req, res) => {

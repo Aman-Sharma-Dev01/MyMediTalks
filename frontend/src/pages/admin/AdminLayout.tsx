@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
-import { Pencil, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { Pencil, LayoutDashboard, Settings, LogOut, MessageCircle, Bell } from 'lucide-react';
 
 export default function AdminLayout() {
     const { user, logout } = useAuth();
@@ -23,6 +23,18 @@ export default function AdminLayout() {
                         className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-primary/5 hover:text-ink'}`}
                     >
                         <LayoutDashboard size={18} /> Dashboard
+                    </NavLink>
+                    <NavLink
+                        to="/admin/notifications"
+                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-primary/5 hover:text-ink'}`}
+                    >
+                        <Bell size={18} /> Notifications
+                    </NavLink>
+                    <NavLink
+                        to="/admin/engagement"
+                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-primary/5 hover:text-ink'}`}
+                    >
+                        <MessageCircle size={18} /> Engagement
                     </NavLink>
                     <NavLink
                         to="/admin/editor"

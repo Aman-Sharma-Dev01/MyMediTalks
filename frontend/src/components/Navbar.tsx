@@ -1,16 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
+import { Bell, LogOut, Bookmark, Heart, User } from 'lucide-react';
 import api from '../lib/api';
+import { useReaderAuth } from '../lib/ReaderAuthContext';
+import LoginModal from './LoginModal';
+import SubscribeModal from './SubscribeModal';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { reader, isAuthenticated, logout } = useReaderAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [subscribeModalOpen, setSubscribeModalOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
     { name: 'The Journal', path: '/' },
@@ -61,10 +70,22 @@ export default function Navbar() {
       if (e.key === 'Escape') {
         setSearchOpen(false);
         setSearchQuery('');
+        setUserMenuOpen(false);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -100,19 +121,92 @@ export default function Navbar() {
           </nav>
 
           {/* Icons Right */}
-          <div className="flex items-center gap-4 text-ink/70">
+          <div className="flex items-center gap-3 text-ink/70">
+            {/* Subscribe Button - hide if user is authenticated and subscribed */}
+            {!(isAuthenticated && reader?.isSubscribed) && (
+              <button
+                onClick={() => setSubscribeModalOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-all text-sm font-medium group"
+              >
+                <Bell size={16} className="group-hover:animate-bounce" />
+                <span>Subscribe</span>
+              </button>
+            )}
+
             <button
               onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(''); }}
-              className="hover:text-primary transition-colors"
+              className="hover:text-primary transition-colors p-2"
               title="Search articles"
             >
               <span className="material-symbols-outlined text-xl">search</span>
             </button>
-            <Link to="/archive" className="hover:text-primary transition-colors" title="Browse archive">
-              <span className="material-symbols-outlined text-xl">local_library</span>
-            </Link>
+
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
+                  <img
+                    src={reader?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(reader?.name || 'U')}&background=d4a574&color=fff`}
+                    alt={reader?.name}
+                    className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20"
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-primary/10 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                    <div className="px-4 py-3 border-b border-primary/10">
+                      <p className="font-medium text-ink truncate">{reader?.name}</p>
+                      <p className="text-xs text-secondary truncate">{reader?.email}</p>
+                      {reader?.isSubscribed && (
+                        <p className="text-xs text-primary mt-1 flex items-center gap-1">
+                          <Bell size={12} /> Subscribed
+                        </p>
+                      )}
+                    </div>
+                    <div className="py-1">
+                      <button
+                        onClick={() => { setUserMenuOpen(false); navigate('/saved'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-ink hover:bg-primary/5 flex items-center gap-3"
+                      >
+                        <Bookmark size={16} className="text-primary" />
+                        Saved Articles
+                      </button>
+                      <button
+                        onClick={() => { setUserMenuOpen(false); navigate('/liked'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-ink hover:bg-primary/5 flex items-center gap-3"
+                      >
+                        <Heart size={16} className="text-primary" />
+                        Liked Articles
+                      </button>
+                    </div>
+                    <div className="border-t border-primary/10 pt-1">
+                      <button
+                        onClick={() => { logout(); setUserMenuOpen(false); }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                      >
+                        <LogOut size={16} />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setLoginModalOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 border border-primary/30 text-ink rounded-full hover:bg-primary/5 transition-all text-sm"
+              >
+                <User size={16} />
+                <span>Sign In</span>
+              </button>
+            )}
+
             <button
-              className="lg:hidden text-ink hover:text-primary transition-colors"
+              className="lg:hidden text-ink hover:text-primary transition-colors p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
@@ -138,6 +232,28 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
+              
+              {/* Mobile Subscribe & Auth */}
+              <div className="mt-4 pt-4 border-t border-primary/10 flex flex-col gap-2">
+                {!(isAuthenticated && reader?.isSubscribed) && (
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); setSubscribeModalOpen(true); }}
+                    className="flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-xl text-lg font-hand"
+                  >
+                    <Bell size={18} />
+                    Subscribe
+                  </button>
+                )}
+                {!isAuthenticated && (
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); setLoginModalOpen(true); }}
+                    className="flex items-center gap-2 px-4 py-3 border border-primary/30 text-ink rounded-xl text-lg font-hand"
+                  >
+                    <User size={18} />
+                    Sign In
+                  </button>
+                )}
+              </div>
             </nav>
           </div>
         )}
@@ -199,6 +315,18 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={loginModalOpen} 
+        onClose={() => setLoginModalOpen(false)} 
+      />
+
+      {/* Subscribe Modal */}
+      <SubscribeModal 
+        isOpen={subscribeModalOpen} 
+        onClose={() => setSubscribeModalOpen(false)} 
+      />
     </>
   );
 }
