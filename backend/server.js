@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://mymeditalks.vercel.app',
+    origin: process.env.FRONTEND_URL || 'https://mymeditalks.vercel.app' || 'https://www.mymeditalks.in' || 'https://mymeditalks.in'||'https://mymeditalks.pages.dev',
     credentials: true
 }));
 app.use(express.json());
