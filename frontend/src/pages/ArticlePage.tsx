@@ -24,12 +24,38 @@ export default function ArticlePage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    let currentDescMeta: HTMLMetaElement | null = null;
+    let currentKeywordsMeta: HTMLMetaElement | null = null;
+
     const fetchArticle = async () => {
       try {
         const { data } = await api.get(`/articles/${id}`);
         setArticle(data);
         setViewCount(data.views || 0);
         
+        // SEO: Update Title and Meta Tags for Google Search
+        document.title = `${data.title} | MyMediTalks`;
+        
+        // SEO: Description
+        currentDescMeta = document.querySelector('meta[name="description"]');
+        if (!currentDescMeta) {
+          currentDescMeta = document.createElement('meta');
+          currentDescMeta.setAttribute('name', 'description');
+          document.head.appendChild(currentDescMeta);
+        }
+        currentDescMeta.setAttribute('content', data.excerpt || '');
+
+        // SEO: Tags / Keywords
+        if (data.tags && data.tags.length > 0) {
+          currentKeywordsMeta = document.querySelector('meta[name="keywords"]');
+          if (!currentKeywordsMeta) {
+            currentKeywordsMeta = document.createElement('meta');
+            currentKeywordsMeta.setAttribute('name', 'keywords');
+            document.head.appendChild(currentKeywordsMeta);
+          }
+          currentKeywordsMeta.setAttribute('content', data.tags.join(', '));
+        }
+
         // Increment view count
         api.post(`/articles/${id}/view`).then(res => {
           setViewCount(res.data.views);
@@ -49,7 +75,15 @@ export default function ArticlePage() {
         setLoading(false);
       }
     };
+
     if (id) fetchArticle();
+
+    // Cleanup SEO tags when leaving the page
+    return () => {
+      document.title = 'MyMediTalks';
+      if (currentDescMeta) currentDescMeta.setAttribute('content', 'MyMediTalks - Healthcare & Wellness community');
+      if (currentKeywordsMeta) currentKeywordsMeta.setAttribute('content', 'healthcare, wellness, medicine');
+    };
   }, [id]);
 
   const handleLike = async () => {
@@ -247,9 +281,36 @@ export default function ArticlePage() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="prose prose-lg md:prose-xl prose-slate font-display leading-[1.8] text-ink/90 prose-p:font-light prose-a:text-primary prose-a:underline hover:prose-a:text-ink prose-blockquote:border-primary/30 prose-blockquote:italic prose-blockquote:text-ink/80 prose-img:rounded-2xl mx-auto md:mx-0 w-full"
+            className="prose prose-base md:prose-lg lg:prose-xl prose-slate max-w-none font-display leading-[1.8] text-ink/90 prose-p:font-light prose-a:text-primary prose-a:underline hover:prose-a:text-ink prose-blockquote:border-primary/30 prose-blockquote:italic prose-blockquote:text-ink/80 prose-img:rounded-2xl mx-auto w-full"
           >
-            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            <div 
+              className="tiptap" 
+              dangerouslySetInnerHTML={{ 
+                __html: (() => {
+                  try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(article.content, 'text/html');
+                    const tables = doc.querySelectorAll('table');
+                    tables.forEach(table => {
+                        if (table.parentElement?.classList.contains('tableWrapper')) return;
+                        const wrapper = doc.createElement('div');
+                        wrapper.className = 'tableWrapper';
+                        const layout = table.getAttribute('data-table-layout');
+                        if (layout) {
+                            wrapper.setAttribute('data-table-layout', layout);
+                            // Also ensure the width is fixed for the wrapper so CSS kicks in correctly
+                            wrapper.style.display = 'block';
+                        }
+                        table.parentNode?.insertBefore(wrapper, table);
+                        wrapper.appendChild(table);
+                    });
+                    return doc.body.innerHTML;
+                  } catch (e) {
+                      return article.content;
+                  }
+                })() 
+              }} 
+            />
 
             {article.coverImage && (
               <figure className="my-16 -mx-6 md:-mx-16 lg:-mx-24 bg-cream/50 border border-primary/10 rounded-3xl overflow-hidden shadow-2xl">
